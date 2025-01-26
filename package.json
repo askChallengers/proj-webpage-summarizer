@@ -1,0 +1,25 @@
+{
+  "name": "proj-url-summurizer",
+  "version": "1.0.0",
+  "main": "config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/askChallengers/proj-webpage-summerizer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/askChallengers/proj-webpage-summerizer/issues"
+  },
+  "homepage": "https://github.com/askChallengers/proj-webpage-summerizer#readme",
+  "description": ""
+}
