@@ -1,12 +1,37 @@
 const express = require('express');
 const axios = require('axios');
 const config = require('./config.js');
+const { BigQuery } = require("@google-cloud/bigquery");
 
 const app = express();
 const port = `${config.port}`;
-const apikey = `${config.apikey}`;
+const apikey = `${config.API_KEY}`;
+
+// BigQuery 클라이언트 초기화
+const datasetId = 'summarizer'; // BigQuery 데이터셋 이름
+const tableId = 'news'; // BigQuery 테이블 이름
+const keyFile = `${config.keyFile}`;
+const bigquery = new BigQuery({
+    keyFilename: keyFile
+});
 
 app.use(express.json());
+
+const getData = async () => {
+
+    const query = `
+        SELECT * 
+        FROM team-ask-infra.summarizer.news
+        WHERE regDate = '2025-02-08'  -- 예시로, 2월 1일 이후의 데이터 조회
+        AND \`order\` = 1
+        ;
+    `;
+
+    const [rows] = await bigquery.query(query);
+    console.log('BigQuery rows:', rows);
+
+    return rows;
+}
 
 // 요약 생성 요청
 const requestSummarizeWebPage = async (sourceUrl) => {
@@ -87,9 +112,9 @@ const fetchSummarizeResultWithRetry = async (requestId, resultType, maxRetries =
 };
 
 // GET 요청 처리
-app.get('/urlSummerizer', async (req, res) => {
-    // const { sourceUrl } = req.query;
-    const sourceUrl = "https://n.news.naver.com/article/262/0000018094?cds=news_media_pc&type=editn";
+app.get('/urlSummarizer', async (req, res) => {
+    const rows = await getData();
+    const sourceUrl = rows[0].naverLink;
 
     if (!sourceUrl) {
         return res.status(400).send({ error: "Missing 'sourceUrl' in query parameter." });
