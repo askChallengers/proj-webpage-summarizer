@@ -3,6 +3,9 @@ require('dotenv').config();     // env 설정 파일 임포트
 // 공통으로 사용되는 변수
 const commonConfig = {
     port: 8080,
+    projectId:'team-ask-infra',
+    datasetId:'summarizer',
+    tableId:'news'
 };
 
 // 환경별로 다르게 설정해야 하는 변수
