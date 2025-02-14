@@ -5,7 +5,8 @@ const commonConfig = {
     port: 8080,
     projectId:'team-ask-infra',
     datasetId:'summarizer',
-    tableId:'news'
+    scrapTableId:'news',
+    summaryTableId: 'summary'
 };
 
 // 환경별로 다르게 설정해야 하는 변수
