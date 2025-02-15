@@ -13,7 +13,8 @@ app.use(express.json());
 // BigQuery 클라이언트 초기화
 const projectId = `${config.projectId}`; // BigQuery 데이터셋 이름
 const datasetId = `${config.datasetId}`; // BigQuery 데이터셋 이름
-const tableId = `${config.tableId}`; // BigQuery 테이블 이름
+const scrapTableId = `${config.scrapTableId}`; // BigQuery 테이블 이름
+const summaryTableId = `${config.summaryTableId}`; // BigQuery 테이블 이름
 const keyFile = `${config.keyFile}`;
 const bigquery = new BigQuery({
     keyFilename: keyFile
@@ -22,7 +23,8 @@ const bigquery = new BigQuery({
 const applyConfigToQuery = (query) => {
     return query.replace(/{{projectId}}/g, projectId)
                 .replace(/{{datasetId}}/g, datasetId)
-                .replace(/{{tableId}}/g, tableId)
+                .replace(/{{scrapTableId}}/g, scrapTableId)
+                .replace(/{{summaryTableId}}/g, summaryTableId)
                 ;
 };
 
@@ -37,22 +39,28 @@ const getData = async () => {
 };
 
 // 요약 데이터 적재
-const updateSummarizedData = async (id, summarizedText) => {
-    const query = applyConfigToQuery(queries.updateSummarizedData); // 동적으로 적용
+const insertSummarizedData = async (row) => {
+    const { newsId, requestId, summarizedContent, isSuccess } = row;
+    const query = applyConfigToQuery(queries.insertSummarizedData);
+    console.log(query);
     const options = {
         query: query,
-        params: { id, summarizedText }
+        params: { 
+            newsId,
+            requestId,
+            summarizedContent,
+            isSuccess
+        }
     };
-
     try {
         await bigquery.query(options);
-        console.log("[SUCCESSED] Done updateSummarizedData()");
-        console.log(`BigQuery ID = ${id}`);
+        console.log(`[SUCCESSED] Done Insert insertSummarizedData() - ${newsId}`);
     } catch (error) {
-        console.error("[FAILED] updateSummarizedData() failed:", error);
-        throw new Error("BigQuery update failed");
+        console.error("[FAILED] insertSummarizedData() failed", error);
+        throw new Error("BigQuery insert failed");
     }
-};
+}
+
 
 // 요약 생성 요청
 const requestSummarizeWebPage = async (sourceUrl) => {
@@ -153,11 +161,24 @@ app.get('/urlSummarizer', async (req, res) => {
         
         // 요약 정보 업데이트(원본 데이터 자체를 넣자. json 데이터 형태 자체를. 그래야 원본 데이터를 일단 적재 할 수 있으니까.)
         console.log(summarizeResult);
-        const summaryText = JSON.stringify(summarizeResult.data.data);
+        const summarizedContent = JSON.stringify(summarizeResult);
+        const isSuccess = summarizedContent !== "" ? 'Y' : 'N';
         
-        await updateSummarizedData(id, summaryText);
+        // BigQuery에 삽입할 데이터 변환
+        const row = {
+            newsId: id,
+            requestId: requestId,
+            summarizedContent: summarizedContent,
+            isSuccess: isSuccess
+        };
 
-        res.status(200).send(summarizeResult);
+        console.log('===========================');
+        console.log(row);
+        console.log('===========================');
+
+        await insertSummarizedData(row);
+
+        res.status(200).send("Url summary successed");
     } catch (error) {
         res.status(500).send({ error: error.message });
     }
