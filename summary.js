@@ -5,7 +5,7 @@ const axios = require('axios');
 const { BigQuery } = require("@google-cloud/bigquery");
 
 const app = express();
-const port = `${config.port}`;
+const port = `${config.sPort}`;
 const apikey = `${config.API_KEY}`;
 
 app.use(express.json());
@@ -159,7 +159,7 @@ app.get('/urlSummarizer', async (req, res) => {
         // 요약 결과 가져오기 호출
         const summarizeResult = await fetchSummarizeResultWithRetry(requestId, resultType);
         
-        // 요약 정보 업데이트(원본 데이터 자체를 넣자. json 데이터 형태 자체를. 그래야 원본 데이터를 일단 적재 할 수 있으니까.)
+        // 요약 정보 업데이트(원본 데이터 자체를 적재하자.)
         console.log(summarizeResult);
         const summarizedContent = JSON.stringify(summarizeResult);
         const isSuccess = summarizedContent !== "" ? 'Y' : 'N';

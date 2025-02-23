@@ -2,11 +2,14 @@ require('dotenv').config();     // env 설정 파일 임포트
 
 // 공통으로 사용되는 변수
 const commonConfig = {
-    port: 8080,
+    sPort: 8080,
+    uPort: 8081,
     projectId:'team-ask-infra',
     datasetId:'summarizer',
     scrapTableId:'news',
-    summaryTableId: 'summary'
+    summaryTableId: 'summary',
+    WP_USERNAME: process.env.WP_USERNAME,
+    WP_APP_PASSWORD: process.env.WP_APP_PASSWORD
 };
 
 // 환경별로 다르게 설정해야 하는 변수
